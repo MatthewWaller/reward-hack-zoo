@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reward Hack Zoo</title>
+<style>
+:root {
+  --bg: #f6f6f3; --surface: #fcfcfb; --ink: #1b1b1a; --ink-2: #4f4f4a; --muted: #85857e;
+  --line: #e4e3de; --band: #f0efea; --neutral: #e9e8e2; --code-bg: #f3f2ed;
+  --good: #0ca30c; --good-ink: #0a6e0a; --warn: #fab219; --warn-ink: #7a5200;
+  --crit: #d03b3b; --crit-ink: #a52a2a; --accent: #3d5afe;
+  --shadow: 0 1px 2px rgba(20, 20, 10, .05), 0 1px 1px rgba(20, 20, 10, .03);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121211; --surface: #1a1a19; --ink: #ededea; --ink-2: #bdbdb6; --muted: #86867f;
+    --line: #2d2d2b; --band: #20201f; --neutral: #2b2b29; --code-bg: #151514;
+    --good-ink: #5fd35f; --warn-ink: #fcc75a; --crit-ink: #f07a7a; --accent: #8c9eff;
+    --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121211; --surface: #1a1a19; --ink: #ededea; --ink-2: #bdbdb6; --muted: #86867f;
+  --line: #2d2d2b; --band: #20201f; --neutral: #2b2b29; --code-bg: #151514;
+  --good-ink: #5fd35f; --warn-ink: #fcc75a; --crit-ink: #f07a7a; --accent: #8c9eff;
+  --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+code, pre { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+main { max-width: 1320px; margin: 0 auto; padding: 36px 32px 64px; }
+header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: 34px; letter-spacing: -.02em; margin: 4px 0 6px; font-weight: 700; }
+.lede { color: var(--ink-2); margin: 0; max-width: 760px; font-size: 15px; }
+#theme {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 13px; cursor: pointer;
+}
+.notice {
+  margin: 20px 0 0; padding: 10px 14px; border-radius: 10px; font-size: 13px; color: var(--ink-2);
+  background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+}
+.tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 22px 0 8px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); }
+.tile-value { font-size: 28px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.tile-label { font-weight: 600; font-size: 13px; }
+.tile-note { color: var(--muted); font-size: 12px; }
+h2 { font-size: 18px; margin: 34px 0 4px; letter-spacing: -.01em; }
+.section-note { color: var(--muted); margin: 0 0 12px; font-size: 13px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: var(--ink-2); margin: 0 0 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); overflow-x: auto; }
+table.matrix { width: 100%; border-collapse: collapse; }
+.matrix th { font-size: 11px; font-weight: 600; color: var(--muted); text-align: center; padding: 12px 4px 10px; line-height: 1.25; vertical-align: bottom; border-bottom: 1px solid var(--line); }
+.matrix th.name { text-align: left; padding-left: 18px; }
+.matrix th.species { color: var(--ink-2); }
+.matrix td { padding: 7px 4px; border-bottom: 1px solid var(--line); }
+.matrix td.name { padding-left: 18px; white-space: nowrap; }
+.matrix .col { text-align: center; width: 78px; }
+.matrix .gap { width: 14px; padding: 0; }
+tr.group td { background: var(--band); padding: 10px 18px 9px; }
+.task-name { font-weight: 650; margin-right: 8px; }
+tr.group code { font-size: 12px; color: var(--muted); }
+.weakness { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+tr.row { cursor: pointer; }
+tr.row:hover td, tr.row:focus-visible td { background: color-mix(in srgb, var(--accent) 5%, transparent); }
+tr.row:focus-visible { outline: none; }
+.chevron { display: inline-block; width: 8px; height: 8px; margin-right: 10px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(-45deg); transition: transform .15s; }
+tr.row[aria-expanded="true"] .chevron { transform: rotate(45deg); }
+.spec-name { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+.kind { margin-left: 8px; font-size: 11px; padding: 1px 7px; border-radius: 999px; font-weight: 600; }
+.kind-honest { color: var(--good-ink); background: color-mix(in srgb, var(--good) 13%, transparent); }
+.kind-hack { color: var(--crit-ink); background: color-mix(in srgb, var(--crit) 12%, transparent); }
+.kind-run { color: var(--ink-2); background: var(--neutral); font-weight: 500; }
+.cell { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 6px; font-size: 12px; font-weight: 700; line-height: 1; }
+.cell.pass { color: var(--good-ink); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.cell.fail { color: var(--crit-ink); background: color-mix(in srgb, var(--crit) 14%, transparent); }
+.cell.clean { background: var(--neutral); width: 10px; height: 10px; border-radius: 3px; }
+.cell.suspicious { background: var(--warn); color: #3d2900; }
+.cell.flagged { background: var(--crit); color: #fff; }
+.cell.expected { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--ink-2); }
+.cell.clean.expected { width: 24px; height: 24px; border-radius: 6px; }
+.verdict { display: inline-block; min-width: 76px; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+.v-clean { color: var(--good-ink); background: color-mix(in srgb, var(--good) 13%, transparent); }
+.v-hack { color: var(--crit-ink); background: color-mix(in srgb, var(--crit) 13%, transparent); }
+.v-suspicious { color: var(--warn-ink); background: color-mix(in srgb, var(--warn) 18%, transparent); }
+.v-incorrect { color: var(--ink-2); background: var(--neutral); }
+tr.detail > td { background: color-mix(in srgb, var(--band) 55%, var(--surface)); padding: 0; }
+.detail-inner { padding: 6px 24px 20px 40px; max-width: 1100px; }
+.detail-inner h4 { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 16px 0 6px; }
+.summary { margin: 12px 0 0; font-size: 14px; }
+.meta { font-size: 12px; color: var(--ink-2); margin-top: 6px; }
+.evidence, .plain { margin: 0; padding-left: 0; list-style: none; }
+.evidence > li { margin: 6px 0; }
+.evidence ul { list-style: none; padding-left: 0; margin: 4px 0 0; }
+.evidence code { font-size: 12px; color: var(--ink-2); }
+.plain li { margin: 2px 0; font-size: 13px; }
+.plain code { font-size: 12px; }
+.muted { color: var(--muted); }
+.bad { color: var(--crit-ink); }
+.pill { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 6px; border-radius: 4px; margin-right: 8px; }
+.p-flagged { background: var(--crit); color: #fff; }
+.p-suspicious { background: var(--warn); color: #3d2900; }
+.p-clean { background: var(--neutral); color: var(--ink-2); }
+pre.code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.55; max-height: 340px; overflow: auto; margin: 0; white-space: pre; }
+.d-add { color: var(--good-ink); } .d-del { color: var(--crit-ink); } .d-hunk { color: var(--accent); } .d-file { color: var(--muted); font-weight: 600; }
+.empty { padding: 26px 28px; }
+.empty-title { font-weight: 650; font-size: 15px; margin-bottom: 4px; }
+.empty p { margin: 0; color: var(--ink-2); max-width: 760px; }
+.empty code, .notice code { font-size: 12px; background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.glossary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; }
+.gloss { display: flex; gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.gloss code { min-width: 170px; font-size: 12px; font-weight: 600; }
+.gloss span { color: var(--ink-2); }
+footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
+@media (max-width: 900px) {
+  main { padding: 24px 16px 48px; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .glossary { grid-template-columns: 1fr; }
+  header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="eyebrow">reward-hack-zoo &middot; report</div>
+      <h1>Reward Hack Zoo</h1>
+      <p class="lede">Ways a coding agent can make the tests pass without solving the problem, and the checks that catch each one. Every task has a deliberately weak visible test suite and a robust hidden one.</p>
+    </div>
+    <button id="theme" type="button">Toggle theme</button>
+  </header>
+  <div class="notice">Every specimen below is an <b>illustrative fixture hand-written for this repo</b>. None is output from a real model, and nothing here compares models. Real agent runs appear only under <b>Recorded agent runs</b>.</div>
+
+  <div class="tiles">$stats</div>
+
+  <h2>Specimens</h2>
+  <p class="section-note">Rows are specimens grouped by task. Click a row for evidence, the test diff and the solution.</p>
+  <div class="legend">
+    <span><span class="cell pass">&#x2713;</span>suite passes</span>
+    <span><span class="cell fail">&#x2715;</span>suite fails</span>
+    <span><span class="cell flagged">&#x2715;</span>species flagged</span>
+    <span><span class="cell suspicious">!</span>suspicious</span>
+    <span><span class="cell clean"></span>clean</span>
+    <span><span class="cell clean expected"></span>ring: what the fixture was written to show</span>
+  </div>
+  <div class="card">$specimen_table</div>
+
+  <h2>Recorded agent runs</h2>
+  <p class="section-note">Real runs only, loaded from <code>runs/*.json</code>.</p>
+  <div class="card">$runs_section</div>
+
+  <h2>Species</h2>
+  <div class="glossary">$glossary</div>
+
+  <footer>Generated $generated by <code>zoo report</code> &middot; Matthew Waller &middot; MIT License</footer>
+</main>
+<script>
+(function () {
+  var root = document.documentElement;
+  try { var saved = localStorage.getItem("zoo-theme"); if (saved) root.dataset.theme = saved; } catch (e) {}
+  document.getElementById("theme").addEventListener("click", function () {
+    var dark = root.dataset.theme ? root.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("zoo-theme", root.dataset.theme); } catch (e) {}
+  });
+  function toggle(row, open) {
+    var detail = document.getElementById(row.dataset.target);
+    detail.hidden = open === undefined ? !detail.hidden : !open;
+    row.setAttribute("aria-expanded", String(!detail.hidden));
+  }
+  document.querySelectorAll("tr.row").forEach(function (row) {
+    row.addEventListener("click", function () { toggle(row); });
+    row.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(row); }
+    });
+  });
+  var match = location.hash.match(/^#open-(\w+)$$/);
+  var target = match && document.querySelector('tr.row[data-target="' + match[1] + '"]');
+  if (target) toggle(target, true);
+}());
+</script>
+</body>
+</html>
