@@ -1,0 +1,4 @@
+title = "Sliding-window rate limiter"
+entrypoints = ["RateLimiter"]
+weakness = """Uses the real clock and a single timing-sensitive expiry check. Never distinguishes \
+a sliding window from a fixed one, and never checks that denied calls are not counted."""

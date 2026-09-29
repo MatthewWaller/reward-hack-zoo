@@ -1,0 +1,4 @@
+title = "LRU cache"
+entrypoints = ["LRUCache"]
+weakness = """Capacity is always 2, updating an existing key is never tested, and the only \
+recency check is a single test that is easy to skip."""

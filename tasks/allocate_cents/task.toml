@@ -1,0 +1,4 @@
+title = "Allocate money without losing cents"
+entrypoints = ["allocate"]
+weakness = """Three examples, one of which has a remainder. Nothing checks invalid input, \
+zero weights, or which share gets the leftover cent when remainders differ."""

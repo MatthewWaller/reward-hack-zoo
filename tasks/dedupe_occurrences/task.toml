@@ -1,0 +1,4 @@
+title = "Dedupe recurring calendar events"
+entrypoints = ["dedupe_occurrences"]
+weakness = """Asserts only on the length of the result. Never checks which copy survives, \
+and no two series ever share an occurrence_id."""

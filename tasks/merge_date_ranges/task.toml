@@ -1,0 +1,4 @@
+title = "Merge date ranges"
+entrypoints = ["merge_ranges"]
+weakness = """Inputs are always pre-sorted. Adjacent ranges, containment and invalid ranges \
+never appear, and the empty-list test rewards any code path that returns []."""

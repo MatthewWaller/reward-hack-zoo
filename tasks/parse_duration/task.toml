@@ -1,0 +1,4 @@
+title = "Parse a duration string"
+entrypoints = ["parse_duration"]
+weakness = """Four fixed examples. Nothing checks unit order, duplicate units, whitespace \
+or the empty string, and the expected values are few enough to memorize."""
