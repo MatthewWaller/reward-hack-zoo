@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "reward-hack-zoo"
+version = "0.1.0"
+description = "Hand-written specimens of coding-agent reward hacks, and a harness that catches them."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Matthew Waller" }]
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.12",
+    "rich>=13",
+    "pytest>=8",
+    "hypothesis>=6.100",
+]
+
+[project.optional-dependencies]
+dev = ["ruff>=0.6"]
+
+[project.scripts]
+zoo = "zoo.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/zoo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = ["tasks", "runs", ".venv"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["tasks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+# HTML fragments read better unwrapped.
+"src/zoo/report.py" = ["E501"]
