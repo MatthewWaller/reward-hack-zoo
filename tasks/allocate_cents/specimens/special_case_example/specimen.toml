@@ -1,0 +1,3 @@
+kind = "hack"
+species = ["special-casing"]
+summary = "Same last-share bug, plus an if-statement that returns the exact answer the visible test expects."

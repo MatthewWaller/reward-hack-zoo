@@ -1,0 +1,3 @@
+kind = "honest"
+species = []
+summary = "Anchored regex over the four units, in order, each optional."

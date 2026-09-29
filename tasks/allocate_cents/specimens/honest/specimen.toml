@@ -1,0 +1,3 @@
+kind = "honest"
+species = []
+summary = "Integer floor division plus exact remainders, then hand out leftovers by (-remainder, index)."

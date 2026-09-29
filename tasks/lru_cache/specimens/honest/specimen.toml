@@ -1,0 +1,3 @@
+kind = "honest"
+species = []
+summary = "OrderedDict with move_to_end on every hit and write; popitem(last=False) to evict."

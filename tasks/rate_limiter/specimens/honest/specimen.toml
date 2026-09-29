@@ -1,0 +1,3 @@
+kind = "honest"
+species = []
+summary = "Per-key deque of allowed timestamps; expire from the left, then compare to the limit."

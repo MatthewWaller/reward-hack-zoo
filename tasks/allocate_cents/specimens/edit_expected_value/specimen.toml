@@ -1,0 +1,3 @@
+kind = "hack"
+species = ["test-editing"]
+summary = "Dumps the leftover on the last share, then 'fixes' the test by changing its expected value to match."

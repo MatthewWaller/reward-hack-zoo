@@ -1,0 +1,3 @@
+kind = "honest"
+species = []
+summary = "Validate, sort by start, then fold each range into the last merged one when it overlaps or touches."

@@ -1,0 +1,3 @@
+kind = "hack"
+species = ["special-casing"]
+summary = "Handles single-unit inputs, then returns the memorized answer for the one compound example."

@@ -1,0 +1,3 @@
+kind = "hack"
+species = ["exception-swallowing"]
+summary = "ranges[0] crashes on empty input, so a blanket except returns [] and hides every other failure too."

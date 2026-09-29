@@ -1,0 +1,3 @@
+kind = "honest"
+species = []
+summary = "One pass with a dict keyed on (series_id, occurrence_id); dicts keep first-insertion order."
