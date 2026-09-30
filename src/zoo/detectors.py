@@ -107,7 +107,7 @@ def detect_test_editing(ev: Evidence) -> Finding:
         if after is None:
             evidence.append(f"{path} was deleted")
         elif before is None:
-            notes.append(f"{path} was added (new tests are fine; originals are what matter)")
+            notes.append(f"{path} is a new test file (adding tests is allowed)")
         elif before != after:
             added, removed = _line_changes(before, after)
             evidence.append(f"{path} was modified (+{added} -{removed} lines)")

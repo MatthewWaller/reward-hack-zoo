@@ -17,9 +17,21 @@ from zoo.detectors import SPECIES, Finding, Level
 from zoo.tasks import Specimen, Task, all_tasks
 
 SUITE_COLUMNS = {
-    "visible": "Visible<br>as submitted",
-    "original": "Visible<br>original",
-    "hidden": "Hidden",
+    "visible": (
+        "Submitted<br>tests",
+        "Submitted tests",
+        "The tests and config the candidate left behind",
+    ),
+    "original": (
+        "Original<br>visible",
+        "Original visible tests",
+        "The task's original visible tests, run on the candidate's solution.py",
+    ),
+    "hidden": (
+        "Hidden<br>tests",
+        "Hidden tests",
+        "The hidden suite, run on the candidate's solution.py",
+    ),
 }
 LEVEL_GLYPH = {Level.CLEAN: "", Level.SUSPICIOUS: "!", Level.FLAGGED: "&#x2715;"}
 
@@ -117,7 +129,10 @@ def _stats(rows, hacks, honest, runs) -> str:
 
 
 def _header_row(first: str) -> str:
-    suites = "".join(f'<th class="col">{label}</th>' for label in SUITE_COLUMNS.values())
+    suites = "".join(
+        f'<th class="col" title="{escape(tip)}">{label}</th>'
+        for label, _name, tip in SUITE_COLUMNS.values()
+    )
     species = "".join(
         f'<th class="col species" title="{escape(desc)}">{escape(name).replace("-", "-<br>", 1)}</th>'
         for name, desc in SPECIES.items()
@@ -236,7 +251,7 @@ def _detail(result: CheckResult, summary: str = "", extra: str = "") -> str:
         )
         parts.append(f'<h4>Evidence</h4><ul class="evidence">{items}</ul>')
     suites = "".join(
-        f"<li><b>{name}</b> {escape(s.summary())}"
+        f"<li><b>{escape(SUITE_COLUMNS[name][1])}</b> {escape(s.summary())}"
         + (
             f' <span class="muted">failing: {escape(", ".join(s.failures[:5]))}</span>'
             if s.failures
@@ -258,10 +273,16 @@ def _sensitivity(result: CheckResult) -> str:
         return "<h4>Test sensitivity</h4><p>Skipped: solution.py does not parse.</p>"
     null = "fail, as they should" if s.null_killed else '<b class="bad">still pass</b>'
     survivors = "".join(f"<li><code>{escape(d)}</code></li>" for d in s.survivors)
+    if s.total:
+        killed = (
+            f" They kill {s.killed} of {s.total} single-point mutants of this solution"
+            + (f'; these survive:</p><ul class="plain">{survivors}</ul>' if survivors else ".</p>")
+        )
+    else:
+        killed = " This solution has no mutation sites.</p>"
     return (
-        f"<h4>Test sensitivity</h4><p>Against a null implementation the submitted tests {null}. "
-        f"They kill {s.killed} of {s.total} single-point mutants of this solution"
-        + (f'; these survive:</p><ul class="plain">{survivors}</ul>' if survivors else ".</p>")
+        f"<h4>Test sensitivity</h4><p>Against a null implementation the submitted tests {null}."
+        f"{killed}"
     )
 
 

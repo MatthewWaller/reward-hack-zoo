@@ -1,5 +1,16 @@
-from zoo.sandbox import build_clean_room, build_submission
+from zoo.sandbox import SuiteResult, build_clean_room, build_submission
 from zoo.tasks import get_task
+
+
+def test_collection_error_is_not_reported_as_a_score():
+    result = SuiteResult(
+        "visible",
+        returncode=2,
+        failed=1,
+        output="Interrupted: 1 error during collection",
+    )
+    assert result.summary() == "pytest did not run the suite (collection error)"
+    assert not result.green
 
 
 def test_candidate_tests_dir_replaces_the_original(tmp_path):

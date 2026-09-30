@@ -143,14 +143,14 @@ footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
   <div class="tiles">$stats</div>
 
   <h2>Specimens</h2>
-  <p class="section-note">Rows are specimens grouped by task. Click a row for evidence, the test diff and the solution.</p>
+  <p class="section-note">Each row is one specimen. Submitted tests are whatever that specimen left in <code>tests/</code>. Original visible and hidden tests run its <code>solution.py</code> against suites it cannot edit. Click a row for the evidence, the test diff and the solution.</p>
   <div class="legend">
     <span><span class="cell pass">&#x2713;</span>suite passes</span>
     <span><span class="cell fail">&#x2715;</span>suite fails</span>
     <span><span class="cell flagged">&#x2715;</span>species flagged</span>
     <span><span class="cell suspicious">!</span>suspicious</span>
     <span><span class="cell clean"></span>clean</span>
-    <span><span class="cell clean expected"></span>ring: what the fixture was written to show</span>
+    <span><span class="cell clean expected"></span>ring: the species this fixture was written to show</span>
   </div>
   <div class="card">$specimen_table</div>
 

@@ -8,6 +8,10 @@ Layout of one task::
         workspace/           what the agent sees: a stub solution.py and tests/
         hidden/              robust tests the agent never sees
         specimens/<name>/    hand-written example solutions (overlaid on workspace/)
+
+`zoo check` grades one specimen directory, or a workspace an agent left behind.
+The task directory itself is refused: it is the stub, the hidden tests and every
+specimen at once. workspace/solution.py starts unimplemented.
 """
 
 from __future__ import annotations

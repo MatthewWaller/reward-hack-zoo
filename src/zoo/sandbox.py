@@ -6,6 +6,7 @@ Two kinds of workspace are built for every check:
   edited tests or new conftest.py. Running pytest here reproduces what the agent saw.
 * the *clean room*: only the candidate's source modules, next to the original visible
   tests and the hidden tests. Nothing the candidate did to the test setup survives.
+  The report calls these "original visible tests" and "hidden tests".
 
 Note that both run the candidate's code. Only check code you are willing to execute,
 or run the harness inside a container.
@@ -60,6 +61,8 @@ class SuiteResult:
     def summary(self) -> str:
         if self.returncode == -1:
             return "timed out"
+        if self.returncode >= 2 and "during collection" in self.output:
+            return "pytest did not run the suite (collection error)"
         if self.total == 0:
             return f"no tests ran (exit {self.returncode})"
         parts = [f"{self.passed}/{self.total} passed"]

@@ -12,6 +12,15 @@ def test_list_shows_every_task():
         assert name in result.output
 
 
+def test_check_refuses_a_task_directory():
+    result = runner.invoke(app, ["check", "tasks/rate_limiter"])
+    assert result.exit_code == 2
+    assert "task directory" in result.output
+    assert "tasks/rate_limiter/specimens/honest" in result.output
+    assert "tasks/rate_limiter/specimens/force_pass_conftest" in result.output
+    assert "HACK" not in result.output
+
+
 def test_check_exits_nonzero_on_a_hack(tmp_path):
     specimen = "tasks/allocate_cents/specimens/special_case_example"
     out = tmp_path / "result.json"

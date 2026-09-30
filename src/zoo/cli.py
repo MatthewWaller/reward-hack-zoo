@@ -14,7 +14,7 @@ from rich.text import Text
 
 from zoo.check import CheckResult, check
 from zoo.detectors import Level
-from zoo.tasks import REPO_ROOT, all_tasks, get_task, infer_task
+from zoo.tasks import REPO_ROOT, all_tasks, get_task, infer_task, load_task
 
 app = typer.Typer(add_completion=False, no_args_is_help=True, help=__doc__)
 console = Console()
@@ -27,10 +27,14 @@ VERDICT_STYLE = {
 }
 LEVEL_STYLE = {Level.CLEAN: "green", Level.SUSPICIOUS: "dark_orange", Level.FLAGGED: "bold red"}
 SUITE_LABELS = {
-    "visible": "Visible tests, as submitted",
-    "original": "Original visible tests (clean room)",
-    "hidden": "Hidden tests (clean room)",
+    "visible": "Submitted tests",
+    "original": "Original visible tests",
+    "hidden": "Hidden tests",
 }
+SUITE_NOTE = (
+    "Submitted tests run with the candidate's tests and config. "
+    "The other two run its solution.py against suites it cannot edit."
+)
 
 
 @app.command("list")
@@ -46,24 +50,41 @@ def list_tasks() -> None:
         )
         table.add_row(f"{task.name}\n[dim]{task.title}[/dim]", task.weakness, specimens)
     console.print(table)
+    console.print(
+        "\n[dim]Grade one specimen with[/dim] zoo check tasks/<task>/specimens/<name>"
+        "\n[dim]Grade every specimen with[/dim] zoo report"
+        "\n[dim]workspace/solution.py is an unimplemented stub. "
+        "Pointing zoo check at a task directory is refused.[/dim]"
+    )
 
 
 @app.command("check")
 def check_command(
     candidate: Annotated[
-        Path, typer.Argument(exists=True, file_okay=False, help="Workspace or specimen directory.")
+        Path,
+        typer.Argument(
+            exists=True,
+            file_okay=False,
+            help="Specimen directory, or a workspace an agent left behind.",
+        ),
     ],
     task: Annotated[
-        str | None, typer.Option(help="Task name; inferred from the path if omitted.")
+        str | None,
+        typer.Option(help="Task name. Inferred by walking up to task.toml if omitted."),
     ] = None,
     json_out: Annotated[
         Path | None, typer.Option("--json", help="Also write the result as JSON.")
     ] = None,
 ) -> None:
-    """Run visible, original and hidden tests plus every detector against one candidate.
+    """Grade one solution: a specimen, or a workspace an agent left behind.
 
-    Exits 0 only when the verdict is "clean".
+    A task directory (the folder that contains task.toml) holds the stub, the hidden
+    tests and every specimen. That path is refused. workspace/solution.py starts
+    unimplemented, so grading workspace/ fails every test.
+
+    Exits 0 only when the verdict is "clean", and 2 when the path is a task directory.
     """
+    _reject_task_directory(candidate)
     task_obj = get_task(task) if task else infer_task(candidate)
     with console.status(f"Checking {candidate} against {task_obj.name}..."):
         result = check(task_obj, candidate)
@@ -117,6 +138,26 @@ def run_agent_command(
     console.print(f"Saved run record to [bold]{record_path}[/bold]")
 
 
+def _reject_task_directory(candidate: Path) -> None:
+    """The task folder is a collection of solutions. zoo check grades one of them."""
+    if not (candidate / "task.toml").is_file():
+        return
+    task = load_task(candidate)
+    commands = "\n".join(
+        f"  zoo check {candidate / 'specimens' / specimen.name}" for specimen in task.specimens()
+    )
+    console.print(
+        f"{candidate} is a task directory. It holds the unimplemented stub in workspace/, "
+        "the hidden tests, and every specimen. zoo check grades one solution at a time.\n\n"
+        "Grade one specimen:\n"
+        f"{commands}\n\n"
+        "Grade every specimen with zoo report.\n\n"
+        "workspace/solution.py is the stub. "
+        f"zoo check {candidate / 'workspace'} grades that stub, and every test fails."
+    )
+    raise typer.Exit(2)
+
+
 def print_result(result: CheckResult) -> None:
     suites = Table(box=None, show_header=False, padding=(0, 2, 0, 0))
     for name, suite in result.suites.items():
@@ -137,10 +178,16 @@ def print_result(result: CheckResult) -> None:
     s = result.sensitivity
     if s.measured:
         null = "fail" if s.null_killed else "[bold red]still pass[/bold red]"
-        sensitivity = (
-            f"Submitted tests {null} against a null implementation, "
-            f"and kill {s.killed}/{s.total} mutants."
-        )
+        if s.total:
+            sensitivity = (
+                f"Submitted tests {null} against a null implementation, "
+                f"and kill {s.killed}/{s.total} mutants."
+            )
+        else:
+            sensitivity = (
+                f"Submitted tests {null} against a null implementation. "
+                "This solution has no mutation sites."
+            )
     else:
         sensitivity = "Mutation probes skipped (solution.py does not parse)."
 
@@ -149,7 +196,14 @@ def print_result(result: CheckResult) -> None:
     title = Text.assemble(f"{result.candidate}  ", verdict, f"  {flagged}" if flagged else "")
     console.print(
         Panel(
-            Group(suites, "", species, "", Text.from_markup(sensitivity)),
+            Group(
+                suites,
+                Text(SUITE_NOTE, style="dim"),
+                "",
+                species,
+                "",
+                Text.from_markup(sensitivity),
+            ),
             title=title,
             title_align="left",
         )
